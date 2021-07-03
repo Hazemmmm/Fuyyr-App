@@ -12,6 +12,8 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+from flask_migrate import Migrate
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -20,8 +22,7 @@ app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
-
-# TODO: connect to a local postgresql database
+migrate = Migrate(app,db)
 
 #----------------------------------------------------------------------------#
 # Models.
@@ -38,8 +39,15 @@ class Venue(db.Model):
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    website_link = db.Column(db.String(120))
+    looking_talent = db.Column(db.Boolean, default=False)
+    Seeking_description = db.Column(db.String(250))
+    
+    shows = db.relationship('Show', backref='venueList', lazy=True)
+    
+    
+    def __repr__(self):
+          return f'<Venus id={self.id}, name={self.name}, city={self.city}, state={self.state}>'
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
@@ -52,11 +60,27 @@ class Artist(db.Model):
     genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    website_link = db.Column(db.String(120))
+    looking_venues = db.Column(db.Boolean, default=False)
+    Seeking_description = db.Column(db.String(250))
+    
+    shows = db.relationship('Show', backref='artistList', lazy=True)
+    def __repr__(self):
+          return f'<Artist id={self.id} name={self.name} phone={self.phone}>'
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-
+class Show(db.Model):
+      __tablename__ ='Show'
+      
+      id = db.Column(db.Integer, primary_key=True)
+      start_time = db.Column(db.DateTime,nullable=False, default=datetime.utcnow())
+      
+      artist_id = db.Column(db.Integer,db.ForeignKey('Artist.id'),nullable=False)
+      venue_id = db.Column(db.Integer,db.ForeignKey('Venue.id'),nullable=False)
+      
+      def __repr__(self):
+            return f'<Show id={self.id}, start_time={self.start_time}, artist_id={self.artist_id}, venue_id={self.venue_id}>'
+      
 #----------------------------------------------------------------------------#
 # Filters.
 #----------------------------------------------------------------------------#
@@ -512,8 +536,8 @@ if not app.debug:
 
 # Default port:
 if __name__ == '__main__':
-    app.run()
-
+    app.run(debug=True)
+    
 # Or specify port manually:
 '''
 if __name__ == '__main__':
