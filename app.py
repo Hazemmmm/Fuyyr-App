@@ -147,17 +147,12 @@ def venues():
   return render_template('pages/venues.html', areas=data)
 
 
-@app.route('/venues/search', methods=['POST'])
-def search_venues():
+# @app.route('/venues/search', methods=['POST'])
+# def search_venues():
  
-  search_term = request.form.get('search','')
-  result = Venue.query.filter(Venue.name.ilike(f'%{search_term}%'))
+  # search_term = request.form.get('search','')
 
-  response={
-    "count": result.count(),
-    "data": result
-  }
-  return render_template('pages/search_venues.html', results=response, search_term=search_term)
+  # return render_template('pages/search_venues.html', results=response, search_term=search_term)
 
 
 @app.route('/venues/<int:venue_id>')
