@@ -9,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
+from werkzeug.wrappers import response
 from forms import *
 from flask_migrate import Migrate
 from datetime import datetime
@@ -80,12 +81,22 @@ def venues():
   return render_template('pages/venues.html', areas=venue_data)
 
 
-# @app.route('/venues/search', methods=['POST'])
-# def search_venues():
+@app.route('/venues/search', methods=['POST'])
+def search_venues():
  
-  # search_term = request.form.get('search','')
+  search_term = request.form.get('search_term','')
+  
+  venue_results = Venue.query.filter(Venue.name.ilike(f'%{search_term}%')).all()
 
-  # return render_template('pages/search_venues.html', results=response, search_term=search_term)
+  count_venue_result = len(venue_results)
+ 
+  response = {
+    
+    "count" : count_venue_result,
+    "data": venue_results
+  }
+
+  return render_template('pages/search_venues.html', results=response, search_term=search_term)
 
 
 @app.route('/venues/<int:venue_id>')
@@ -213,12 +224,20 @@ def artists():
   return render_template('pages/artists.html', artists=artist_data)
 
 
-# @app.route('/artists/search', methods=['POST'])
-# def search_artists():
-#   search_term = request.form.get('search_term', '')
-#   result  = Artist.query.filter(Artist.name.ilike(f'%{search_term}%'))
+@app.route('/artists/search', methods=['POST'])
+def search_artists():
+  search_term = request.form.get('search_term','')
+  
+  artist_results = Artist.query.filter(Artist.name.ilike(f'%{search_term}%')).all()
+  
+  count_artist_results = len(artist_results)
+  
+  response = {
+    "count": count_artist_results,
+    "data" : artist_results
+  } 
 
-#   return render_template('pages/search_artists.html', results=response, search_term=search_term)
+  return render_template('pages/search_artists.html', results=response, search_term=search_term)
 
 
 
